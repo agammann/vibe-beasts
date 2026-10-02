@@ -8,7 +8,7 @@ const sprite=(id,cls='')=>`<img class="sprite ${cls}" src="assets/${String(id).p
 const button=(label,a,x=0,cls='',disabled=false)=>`<button class="${cls}" data-action="${a}" data-arg="${x}" ${disabled?'disabled':''}>${label}</button>`;
 const hours=s=>`${Math.floor(s/3600)}h ${Math.floor(s%3600/60)}m`;
 const bar=(label,value,max=100,cls='')=>`<div class="stat"><div class="stat-label"><span>${label}</span><span>${max===100?`${value}%`:`${value} / ${max}`}</span></div><div class="bar ${cls}" role="progressbar" aria-label="${label}" aria-valuenow="${value}" aria-valuemin="0" aria-valuemax="${max}"><i style="width:${Math.min(100,value/max*100)}%"></i></div></div>`;
-function persist(){const effectivePause=get(32);action(7,pausedByUser?1:0);const data=storeSave();action(7,effectivePause);try{localStorage.setItem(key,data);$('#save-status').textContent='Saved on this device';}catch{$('#save-status').textContent='Save unavailable';$('#notice').textContent='Browser storage is unavailable. Export your save from Game & saves before leaving.';}}
+function persist(){if(badSave)return;const effectivePause=get(32);action(7,pausedByUser?1:0);const data=storeSave();action(7,effectivePause);try{localStorage.setItem(key,data);$('#save-status').textContent='Saved on this device';}catch{$('#save-status').textContent='Save unavailable';$('#notice').textContent='Browser storage is unavailable. Export your save from Game & saves before leaving.';}}
 function popup(html){$('#dialog-body').innerHTML=html;if(!modal.open)modal.showModal();}
 function announce(){ $('#notice').textContent=message(); }
 function setTab(t){tab=t;document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('selected',b.dataset.tab===t));render();}
