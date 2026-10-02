@@ -1,5 +1,14 @@
 # Release verification
 
+## Browser save recovery — 2026-10-02
+
+- An unreadable stored save stayed intact after a failed import, navigation away and reload in the rendered browser app. Confirming a valid native save restored the active battle and resumed normal saving. The automated persistence regression uses the actual WebAssembly core with a small DOM/storage test host; it also checks explicit new-partner selection.
+- A fresh browser session completed a real 30-second hatch, ten training actions, a complete battle and its 20 XP reward. Field-guide search, manual pause across reload, export download and offline cached reload passed. Screenshots at 1440, 390 and 320 pixels were inspected; no horizontal overflow, page exceptions or external asset requests were observed.
+- Native C++ tests were compiled with LLVM MinGW 20260922 and passed 1,580 simulated battles and the evolution/save checks. The committed WebAssembly module passed interoperability checks against the freshly generated native save fixtures.
+- The published Windows `v1.1.0` ZIP matched its release SHA-256. Its existing executable passed the built-in window/render/save smoke test with all 151 sprites, and the snapshot was inspected. The Windows renderer was not rebuilt or manually played through for this browser-only fix.
+
+These checks used Windows 11 and desktop Edge, with phone-sized viewports rather than physical phones. The earlier release evidence below remains separately scoped.
+
 ## v1.1 evolution update
 
 - All 70 evolving species passed tests immediately below and at their level and cumulative time requirements. All 79 families share one 72-hour full-chain timeline per partner, including hatching; three-form families have a 36-hour intermediate milestone. Late evolution and older saves preserve cumulative time and earned levels.

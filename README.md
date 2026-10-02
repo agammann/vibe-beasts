@@ -47,6 +47,8 @@ Use **Game & saves → Export save** to make a backup or move between editions. 
 
 Clearing browser data can erase your browser save and offline files. Keep exported backups. Like other local single-player games, saves are editable and are not intended for competitive rankings.
 
+If the browser cannot read a stored save, it keeps that data through reloads and navigation. Import a valid backup in **Game & saves**, or explicitly choose a partner to start a new adventure. A failed import leaves the stored data unchanged.
+
 ## Source & credits
 
 The rules, timers, battles, evolution, save validation and Windows renderer are C++17. The web build uses Emscripten WebAssembly with an HTML/CSS/JavaScript interface for responsive, keyboard-accessible controls. The Windows renderer uses raylib 5.5. Build scripts and CI are included; see [BUILD.md](BUILD.md) and [verification notes](VERIFIED.md).
