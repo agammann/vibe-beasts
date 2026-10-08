@@ -6,3 +6,5 @@ tools/
 node_modules/
 .DS_Store
 native-preview.png
+release-artifacts/
+release-staging/

@@ -14,10 +14,12 @@ Use Tackle to restore focus, a type burst for a strong attack, Guard to soften t
 
 **Saves:** automatic in `%LOCALAPPDATA%\VibeBeasts\partner.save`. Export from Game & saves; a backup is written beside the executable. Drop a `.save` file onto the game window to import, then confirm replacement. The browser game uses the same format.
 
+An unreadable stored save stays unchanged until you import a valid backup or explicitly choose an egg for a new adventure. Failed writes keep the previous good save. Export requires a writable game folder. Keep backups before upgrading.
+
 **Uninstall:** remove `%LOCALAPPDATA%\VibeBeasts\app` and the desktop shortcut. Your save is kept separately in the parent VibeBeasts folder.
 
 Play online: https://vibe-beasts.alx21.chatgpt.site
 
 Source, complete instructions and releases: https://github.com/agammann/vibe-beasts
 
-This is an unofficial Pokémon fan game. See CREDITS.md and LICENSE. It has 10 partner families and 32 discoverable species. The executable is unsigned. Windows 10/11 x64 and an OpenGL 3.3-capable graphics driver are required.
+This is an unofficial Pokémon fan game. See CREDITS.md and LICENSE. It has 79 partner families and 151 discoverable species. The executable is unsigned. Windows 10/11 x64 and an OpenGL 3.3-capable graphics driver are required.
