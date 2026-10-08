@@ -10,7 +10,7 @@ Ready-to-play downloads are linked in [README.md](README.md). Playing the Window
 - **Node.js 22 or later** for the local server and browser checks; release CI uses 24.19.0.
 - Git for creating release archives. A downloaded source ZIP builds without Git.
 
-Download and extract [LLVM MinGW](https://github.com/mstorsjo/llvm-mingw/releases/tag/20260922) and [raylib 5.5](https://github.com/raysan5/raylib/releases/tag/5.5). Windows CI checks the compiler archive's SHA-256 and uses the identified raylib 5.5 MinGW asset. The native build receipt records the linked raylib archive's hash.
+Download and extract [LLVM MinGW](https://github.com/mstorsjo/llvm-mingw/releases/tag/20260922) and [raylib 5.5](https://github.com/raysan5/raylib/releases/tag/5.5). Windows CI checks both download archives' SHA-256. The native build receipt records the hash of the linked `libraylib.a` file.
 
 ## Windows
 

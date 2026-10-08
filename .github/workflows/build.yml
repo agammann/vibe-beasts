@@ -38,7 +38,7 @@ jobs:
           if($asset.Count -ne 1){throw 'raylib release identity changed.'}
           Invoke-WebRequest -UseBasicParsing -Uri $asset[0].browser_download_url -OutFile $raylibZip
           if((Get-Item -LiteralPath $raylibZip).Length -ne 1691618){throw 'raylib archive size differs.'}
-          Get-FileHash -LiteralPath $raylibZip -Algorithm SHA256 | Format-List
+          if((Get-FileHash -LiteralPath $raylibZip -Algorithm SHA256).Hash.ToLowerInvariant() -ne 'fe8feda1b92fc02826e2d19c631d648fd0563b93b144893fe18140e9fe4fb6fd'){throw 'raylib archive checksum mismatch.'}
           $raylibFolder=Join-Path $env:RUNNER_TEMP 'raylib'
           Expand-Archive -LiteralPath $raylibZip -DestinationPath $raylibFolder
           $raylib=Join-Path $raylibFolder 'raylib-5.5_win64_mingw-w64'
