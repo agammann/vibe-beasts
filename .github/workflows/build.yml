@@ -1,31 +1,94 @@
-name: Build and test
-on: [push, pull_request, workflow_dispatch]
+name: Build and verify paired editions
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: vibe-beasts-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          node-version: '22'
-      - name: Install native dependencies
-        run: sudo apt-get update && sudo apt-get install -y libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev libgl1-mesa-dev
-      - name: Build desktop and test C++ engine
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24.19.0'
+      - name: Get the matching Windows dependencies
+        shell: powershell
         run: |
-          cmake -S . -B build/cmake -DCMAKE_BUILD_TYPE=Debug
-          cmake --build build/cmake --parallel 2
-          ctest --test-dir build/cmake --output-on-failure
-      - uses: mymindstorm/setup-emsdk@v14
+          $ErrorActionPreference='Stop'
+          $archive=Join-Path $env:RUNNER_TEMP 'llvm-mingw.zip'
+          Invoke-WebRequest -UseBasicParsing -Uri 'https://github.com/mstorsjo/llvm-mingw/releases/download/20260922/llvm-mingw-20260922-ucrt-x86_64.zip' -OutFile $archive
+          if((Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant() -ne 'e3ad77d117a4bea19a7a3b333341824d79a5a371004a10e25b8504e7b3047666'){throw 'Compiler checksum mismatch.'}
+          $tools=Join-Path $env:RUNNER_TEMP 'llvm-mingw'
+          Expand-Archive -LiteralPath $archive -DestinationPath $tools
+          $compiler=Join-Path $tools 'llvm-mingw-20260922-ucrt-x86_64/bin/clang++.exe'
+          "VIBE_COMPILER=$compiler" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          New-Item -ItemType Directory -Force build/tool-dependencies | Out-Null
+          $raylibZip=Join-Path $PWD 'build/tool-dependencies/raylib-5.5-win64.zip'
+          $release=Invoke-RestMethod -Uri 'https://api.github.com/repos/raysan5/raylib/releases/tags/5.5'
+          $asset=@($release.assets | Where-Object {$_.id -eq 207320871 -and $_.name -eq 'raylib-5.5_win64_mingw-w64.zip' -and $_.size -eq 1691618})
+          if($asset.Count -ne 1){throw 'raylib release identity changed.'}
+          Invoke-WebRequest -UseBasicParsing -Uri $asset[0].browser_download_url -OutFile $raylibZip
+          if((Get-Item -LiteralPath $raylibZip).Length -ne 1691618){throw 'raylib archive size differs.'}
+          if((Get-FileHash -LiteralPath $raylibZip -Algorithm SHA256).Hash.ToLowerInvariant() -ne 'fe8feda1b92fc02826e2d19c631d648fd0563b93b144893fe18140e9fe4fb6fd'){throw 'raylib archive checksum mismatch.'}
+          $raylibFolder=Join-Path $env:RUNNER_TEMP 'raylib'
+          Expand-Archive -LiteralPath $raylibZip -DestinationPath $raylibFolder
+          $raylib=Join-Path $raylibFolder 'raylib-5.5_win64_mingw-w64'
+          "VIBE_RAYLIB=$raylib" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - uses: emscripten-core/setup-emsdk@6ab9eb1bda2574c4ddb79809fc9247783eaf9021 # v14
         with:
           version: '4.0.15'
-      - name: Build and test WebAssembly
+      - name: Rebuild both editions and check all delivered packages
+        shell: powershell
         run: |
-          bash scripts/build-web.sh
+          $ErrorActionPreference='Stop'
+          .\scripts\build-windows.ps1 -Compiler $env:VIBE_COMPILER -Raylib $env:VIBE_RAYLIB
+          .\scripts\build-web.ps1
+          git diff --exit-code -- dist/core.js dist/core.wasm dist/BUILD.json dist/sw.js
+          if($LASTEXITCODE -ne 0){throw 'Committed browser edition differs from the rebuilt exact source.'}
           node tests/web-core.mjs
+          if($LASTEXITCODE -ne 0){throw 'Actual rebuilt WASM failed.'}
           npm run check
-      - uses: actions/upload-artifact@v4
+          if($LASTEXITCODE -ne 0){throw 'Browser checks failed.'}
+          .\scripts\package-release.ps1
+          .\scripts\check-release.ps1 -Compiler $env:VIBE_COMPILER -Raylib $env:VIBE_RAYLIB -Out (Join-Path $env:RUNNER_TEMP 'vibe-beasts-consumer')
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: vibe-beasts-web
-          path: dist/
+          name: vibe-beasts-release
+          path: release-artifacts/
+          if-no-files-found: error
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: vibe-beasts-dependencies
+          path: build/tool-dependencies/
+          if-no-files-found: ignore
+  publish:
+    needs: windows
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: vibe-beasts-release
+          path: release-artifacts
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const { default: publish } = await import(process.env.GITHUB_WORKSPACE + '/scripts/release.mjs');
+            await publish({ github, context, core });

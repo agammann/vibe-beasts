@@ -1,6 +1,1 @@
-* text=auto
-*.png binary
-*.wasm binary
-*.exe binary
-*.zip binary
-*.cmd text eol=crlf
+* -text

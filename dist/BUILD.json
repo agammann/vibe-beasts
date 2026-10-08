@@ -1,0 +1,13 @@
+{
+  "version": "1.2.0",
+  "emscripten": "4.0.15",
+  "inputs": {
+    "src/game.cpp": "3432827c4bbd94e8fb5b40857f943fd647263ee49f19318bc36b61beb4fb96a5",
+    "src/game.h": "848c88860c52e519e3ac28ea46e2fe48b820fedd5607dc1120d0ecd045e37c0a",
+    "src/roster.inc": "4c96217a3381883b8da34601823287558d53ec8ba8f3ae02720d0cbc3cdd1535"
+  },
+  "outputs": {
+    "dist/core.js": "2cc7d88828cd7d6909cff2780a647ef49ba5b8b8126aa194b4d1a3ab68b2b3f2",
+    "dist/core.wasm": "943e6d0b5775a6ec8c069f3fc1ebd54f452d131a7059349c284f95872ec690e0"
+  }
+}

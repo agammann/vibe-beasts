@@ -1,5 +1,15 @@
 # Release verification
 
+## 1.2.0 release checks
+
+The release workflow rebuilds the Windows edition and the actual WebAssembly core from one committed source tree. It checks C++ rules, evolution/save fixtures, Windows replacement-file failures, browser save recovery, and all 151 sprite hashes. The rebuilt browser core and cache must match the committed bundle before packaging.
+
+The package consumer in `scripts/check-release.ps1` verifies the source, browser and Windows ZIP checksums, all source Git blobs, matching release identities, Windows files/version and browser files. It rebuilds the delivered source and runs the delivered actual WASM against newly generated native save fixtures. Its optional `-VerifyWindow` performs the real Windows render/save/snapshot check on an OpenGL 3.3 desktop.
+
+The Windows desktop and Chromium browser playthrough are separate release gates: a real 30-awake-second hatch, care, ordinary battle, pause/focus behavior and portable save round trips. Controlled-time fixtures cover 36/72-hour evolution; they do not represent days of elapsed manual play. Current package receipts and the repository's Actions run identify the exact checked source and build. Earlier dated checks below describe their original builds.
+
+The bounded platforms are Windows x64 and Chromium. Phone-sized layouts are browser viewport checks; physical phones, Safari installation and native macOS/Linux runtime are outside that scope. MIT applies to original code and documentation, with separate Pokémon artwork/trademark rights as described in CREDITS.md.
+
 ## Browser save recovery — 2026-10-02
 
 - An unreadable stored save stayed intact after a failed import, navigation away and reload in the rendered browser app. Confirming a valid native save restored the active battle and resumed normal saving. The automated persistence regression uses the actual WebAssembly core with a small DOM/storage test host; it also checks explicit new-partner selection.

@@ -44,6 +44,11 @@ start.events.get('pagehide')();
 assert.equal(fresh.cwrap('vb_load','number',['string'])(start.storage.get(key)),1);
 assert.equal(fresh._vb_get(0),7,'The partner dropdown keeps saving after explicit recovery');
 
+const unreadableFile=await session();
+await unreadableFile.events.get('change')({target:{id:'save-file',files:[{size:100,text:async()=>{throw new Error('File read failed');}}]}});
+assert.match(unreadableFile.node('#dialog-body').innerHTML,/Could not read that file/);
+assert.equal(unreadableFile.storage.get(key),corrupt,'A failed file read must preserve the stored save');
+
 const restore=await session();
 const backup=start.storage.get(key);
 await restore.events.get('change')({target:{id:'save-file',files:[{size:backup.length,text:async()=>backup}]}});

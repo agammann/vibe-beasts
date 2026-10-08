@@ -4,7 +4,7 @@ A little partner. A long adventure.
 
 A free, unofficial Pokémon virtual pet by **agammann**, with original Pokémon Yellow sprites, short turn-based battles, and a C++ game engine shared by the browser and Windows versions.
 
-**[Play in your browser](https://vibe-beasts.alx21.chatgpt.site)** · **[Download for Windows](https://github.com/agammann/vibe-beasts/releases/latest/download/Vibe-Beasts-Windows.zip)** · [Build from source](BUILD.md)
+**[Play in your browser](https://vibe-beasts.alx21.chatgpt.site)** · **[Download for Windows](https://github.com/agammann/vibe-beasts/releases/latest/download/vibe-beasts_1.2.0_windows-x64.zip)** · [Build from source](BUILD.md)
 
 ![Vibe Beasts Windows edition](docs/windows-preview.png)
 
@@ -14,7 +14,9 @@ A free, unofficial Pokémon virtual pet by **agammann**, with original Pokémon 
 
 **Windows 10/11, 64-bit:** download the release ZIP, extract the entire folder, and double-click **Play.cmd**. No compiler, account or internet connection is needed. Optional: **Install.cmd** copies the app into your local application folder, creates a desktop shortcut and launches it. The installer needs no administrator access. Release executables are unsigned; Windows may show its normal download/reputation prompt.
 
-The source-code ZIP is for rebuilding; choose **Vibe-Beasts-Windows.zip** for the ready-to-play game.
+Choose **vibe-beasts_1.2.0_windows-x64.zip** for the ready-to-play game. The same release includes a source ZIP for developers and a browser ZIP for local serving or your own HTTPS host. To use the browser ZIP, extract it, run `node serve.mjs` from its folder with Node.js 22 or later, and open http://localhost:4173.
+
+The three packages carry the same version, source commit and file manifest. Compare their SHA-256 with the release's `SHA256SUMS` before extraction. Older Windows `v1.1.0` remains available in the release history.
 
 ## Your first adventure
 
@@ -47,7 +49,7 @@ Use **Game & saves → Export save** to make a backup or move between editions. 
 
 Clearing browser data can erase your browser save and offline files. Keep exported backups. Like other local single-player games, saves are editable and are not intended for competitive rankings.
 
-If the browser cannot read a stored save, it keeps that data through reloads and navigation. Import a valid backup in **Game & saves**, or explicitly choose a partner to start a new adventure. A failed import leaves the stored data unchanged.
+If either edition cannot read a stored save, it keeps that data through reloads and navigation. Import a valid backup in **Game & saves**, or explicitly choose a partner to start a new adventure. A failed import leaves the stored data unchanged. Windows also keeps the previous good save if a replacement write fails. If the game folder is read-only, copy the portable edition to a writable folder before exporting.
 
 ## Source & credits
 
