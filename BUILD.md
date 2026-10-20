@@ -65,6 +65,8 @@ The [pinned workflow](.github/workflows/build.yml) rebuilds Windows and WebAssem
 
 Any static HTTPS host can serve `dist/`; set `.wasm` to `application/wasm`. For ChatGPT Sites, use your own identity in `.openai/hosting.json`. Do not reuse this project's Site identity.
 
+Native saves and imports use a bounded regular-file read (16,000 bytes); file links and special files are rejected. Choose a real save file for `--save` and imports. Windows save publication renames the open staged handle, while POSIX uses a private staging directory and anchored directory handles. The selected destination directory must remain trusted by its owner; these controls do not isolate arbitrary hostile ancestor directories or another process running as the same account.
+
 The optional CMake layout uses a pinned raylib 5.5 source revision. Native Linux needs raylib's X11/OpenGL development dependencies. Copy `assets/` and `icon-192.png` from `dist/` into the executable's folder and run from that folder on other native platforms. Native macOS/Linux runtime and physical-phone installation are outside this Windows/Chromium release's verified scope.
 
 MIT permissions cover original code and documentation. Pokémon artwork, names and trademarks retain their separate rights; see [CREDITS.md](CREDITS.md).

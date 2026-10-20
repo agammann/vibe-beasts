@@ -3,7 +3,6 @@
 #include "version.h"
 #include "raylib.h"
 #include <filesystem>
-#include <fstream>
 #include <sstream>
 #include <chrono>
 #include <cstdlib>
@@ -48,7 +47,7 @@ static void settings(){box(35,220,480,492,WHITE);text("Your save, your device.",
  box(540,220,465,492,Color{238,243,223,255});text("72 hours of growing together.",562,247,25);wrap("Full chain: 72 total awake hours, including the 30-second hatch. Three-form families evolve at 36 and 72 hours; two-form families at 72. Battles must also reach the shown level.",562,295,420);wrap("Sleep, pause, an unfocused window and closed games stop the timer. Only your selected partner grows. Care never blocks evolution. Former stone and trade evolutions need level 36. Evolving keeps your total awake time and level.",562,432,420);wrap("Pokémon Yellow sprites: The RBY Sprites Project (Plague von Karma). Unofficial fan game by agammann. No affiliation with Pokémon rights holders.",562,568,420,15);if(button("GitHub / help",562,653,420,40))OpenURL("https://github.com/agammann/vibe-beasts");}
 static void frame(){
  bool focused=IsWindowFocused();if(focused!=wasFocus){game.lastTime=now();wasFocus=focused;}game.paused=userPause||!focused;game.tick(now());if(frames%120==0)save();
- if(IsFileDropped()){auto paths=LoadDroppedFiles();if(paths.count){std::string data;std::error_code ec;if(fs::file_size(paths.paths[0],ec)<=16000&&!ec){std::ifstream f(paths.paths[0],std::ios::binary);data.assign(std::istreambuf_iterator<char>(f),{});}vb::Game probe;if(data.size()<=16000&&probe.load(data)){importCandidate=data;popup="Replace current progress with this imported save?";}else popup="That file is not a valid Vibe Beasts save. Your progress is unchanged.";}UnloadDroppedFiles(paths);}
+ if(IsFileDropped()){auto paths=LoadDroppedFiles();if(paths.count){std::string data;auto result=vb::desktop::readSave(fs::u8path(paths.paths[0]),data);vb::Game probe;if(result==vb::desktop::ReadSaveResult::valid&&probe.load(data)){importCandidate=data;popup="Replace current progress with this imported save?";}else popup="That file is not a valid Vibe Beasts save. Your progress is unchanged.";}UnloadDroppedFiles(paths);}
  BeginTextureMode(canvas);ClearBackground(paper);box(35,24,49,49,green);text("VB",42,37,22,lime);text("VIBE BEASTS",100,28,22);text("HATCH. HANG OUT. BATTLE. EVOLVE.",101,57,11,muted);text("Small beasts. Big vibes.",35,104,36);text(badSave?"STORED SAVE NEEDS ATTENTION":saveFailed?"SAVE UNAVAILABLE":"SAVED ON THIS DEVICE",741,120,12,muted);DrawLine(35,90,1005,90,line);
  const char* tabs[]={"01  Partner","02  Battle","03  Field guide","04  Game & saves"};for(int i=0;i<4;i++)if(button(tabs[i],35+i*243,161,231,39,true,page==i))page=i;
  if(page==0)home();else if(page==1)battles();else if(page==2)collection();else if(page==4)partners();else settings();wrap(game.message,35,738,970,16,green);text("VIBE BEASTS v" VIBE_VERSION "   /   BY AGAMMANN",35,796,11,muted);text("UNOFFICIAL POKEMON FAN GAME",773,796,11,muted);
@@ -68,10 +67,9 @@ int main(int argc,char** argv){
  }
  const char* local=std::getenv("LOCALAPPDATA");savePath=(local?fs::path(local):appDirectory)/"VibeBeasts"/"partner.save";
  if(!explicitSave.empty())savePath=fs::absolute(fs::u8path(explicitSave));else if(smoke)savePath=appDirectory/"build"/"smoke.save";
- if(!smoke&&fs::exists(savePath)){
-  std::error_code ec;std::string data;
-  if(fs::file_size(savePath,ec)<=16000&&!ec){std::ifstream f(savePath,std::ios::binary);data.assign(std::istreambuf_iterator<char>(f),{});}
-  if(!game.load(data)){badSave=true;popup="Your stored save could not be read. It is kept unchanged. Import a valid backup or explicitly choose an egg to start a new adventure.";}
+ if(!smoke){
+  std::string data;auto result=vb::desktop::readSave(savePath,data);
+  if(result!=vb::desktop::ReadSaveResult::missing&&(result!=vb::desktop::ReadSaveResult::valid||!game.load(data))){badSave=true;popup="Your stored save could not be read. It is kept unchanged. Import a valid backup or explicitly choose an egg to start a new adventure.";}
  }
  userPause=game.paused;SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_WINDOW_HIGHDPI);InitWindow(1040,820,"Vibe Beasts");auto icon=appDirectory/"icon-192.png";if(!fs::exists(icon))icon=appDirectory/"dist"/"icon-192.png";Image appIcon=LoadImage(icon.u8string().c_str());if(appIcon.data){SetWindowIcon(appIcon);UnloadImage(appIcon);}SetWindowMinSize(780,615);SetTargetFPS(60);canvas=LoadRenderTexture(1040,820);int loaded=0;for(auto&s:vb::species){std::string file="assets/";file+=(s.id<10?"00":s.id<100?"0":"");file+=std::to_string(s.id)+".png";auto sprite=appDirectory/fs::u8path(file);if(!fs::exists(sprite))sprite=appDirectory/"dist"/fs::u8path(file);if(fs::exists(sprite)){sprites[s.id]=LoadTexture(sprite.u8string().c_str());SetTextureFilter(sprites[s.id],TEXTURE_FILTER_POINT);if(sprites[s.id].id)loaded++;}}
  if(loaded!=vb::speciesCount){std::cerr<<"Missing sprites: "<<loaded<<" / "<<vb::speciesCount<<"\n";if(smoke){CloseWindow();return 2;}popup="Some sprites are missing. Extract the whole release ZIP before playing.";}

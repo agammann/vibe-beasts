@@ -4,7 +4,7 @@ A little partner. A long adventure.
 
 A free, unofficial Pokémon virtual pet by **agammann**, with original Pokémon Yellow sprites, short turn-based battles, and a C++ game engine shared by the browser and Windows versions.
 
-**[Play in your browser](https://vibe-beasts.alx21.chatgpt.site)** · **[Download for Windows](https://github.com/agammann/vibe-beasts/releases/latest/download/vibe-beasts_1.2.0_windows-x64.zip)** · [Build from source](BUILD.md)
+**[Play in your browser](https://vibe-beasts.alx21.chatgpt.site)** · **[Download for Windows](https://github.com/agammann/vibe-beasts/releases/latest/download/vibe-beasts_1.2.1_windows-x64.zip)** · [Build from source](BUILD.md)
 
 ![Vibe Beasts Windows edition](docs/windows-preview.png)
 
@@ -14,7 +14,7 @@ A free, unofficial Pokémon virtual pet by **agammann**, with original Pokémon 
 
 **Windows 10/11, 64-bit:** download the release ZIP, extract the entire folder, and double-click **Play.cmd**. No compiler, account or internet connection is needed. Optional: **Install.cmd** copies the app into your local application folder, creates a desktop shortcut and launches it. The installer needs no administrator access. Release executables are unsigned; Windows may show its normal download/reputation prompt.
 
-Choose **vibe-beasts_1.2.0_windows-x64.zip** for the ready-to-play game. The same release includes a source ZIP for developers and a browser ZIP for local serving or your own HTTPS host. To use the browser ZIP, extract it, run `node serve.mjs` from its folder with Node.js 22 or later, and open http://localhost:4173.
+Choose **vibe-beasts_1.2.1_windows-x64.zip** for the ready-to-play game. The same release includes a source ZIP for developers and a browser ZIP for local serving or your own HTTPS host. To use the browser ZIP, extract it, run `node serve.mjs` from its folder with Node.js 22 or later, and open http://localhost:4173.
 
 The three packages carry the same version, source commit and file manifest. Compare their SHA-256 with the release's `SHA256SUMS` before extraction. Older Windows `v1.1.0` remains available in the release history.
 
