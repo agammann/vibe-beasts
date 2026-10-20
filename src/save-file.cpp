@@ -22,12 +22,24 @@
 
 namespace fs = std::filesystem;
 namespace vb::desktop {
+#ifdef _WIN32
+static std::wstring windowsPath(const fs::path& path) {
+    std::error_code ec;
+    auto absolute = fs::absolute(path, ec);
+    if (ec) return {};
+    auto name = absolute.lexically_normal().make_preferred().native();
+    if (name.rfind(L"\\\\?\\", 0) == 0) return name;
+    if (name.rfind(L"\\\\", 0) == 0) return L"\\\\?\\UNC\\" + name.substr(2);
+    return L"\\\\?\\" + name;
+}
+#endif
 ReadSaveResult readSave(const fs::path& path, std::string& data) {
     data.clear();
     char bytes[SaveLimit + 1];
     std::size_t size = 0;
 #ifdef _WIN32
-    HANDLE file = CreateFileW(path.c_str(), GENERIC_READ,
+    const auto filename = windowsPath(path);
+    HANDLE file = CreateFileW(filename.c_str(), GENERIC_READ,
         FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr,
         OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_SEQUENTIAL_SCAN, nullptr);
     if (file == INVALID_HANDLE_VALUE) {
@@ -70,7 +82,13 @@ ReadSaveResult readSave(const fs::path& path, std::string& data) {
 bool writeSave(const fs::path& path, const std::string& data) {
     if (data.size() > SaveLimit || path.filename().empty()) return false;
     std::error_code ec;
-    if (!path.parent_path().empty()) fs::create_directories(path.parent_path(), ec);
+    if (!path.parent_path().empty()) {
+#ifdef _WIN32
+        fs::create_directories(fs::path(windowsPath(path.parent_path())), ec);
+#else
+        fs::create_directories(path.parent_path(), ec);
+#endif
+    }
     if (ec) return false;
     const auto destination = fs::absolute(path, ec);
     if (ec) return false;
@@ -82,7 +100,8 @@ bool writeSave(const fs::path& path, const std::string& data) {
     temporary += ".tmp-" + suffix;
     // CREATE_NEW never opens a pre-existing file/link. Read-only sharing keeps
     // the staged object pinned until its handle-based rename or removal.
-    HANDLE file = CreateFileW(temporary.c_str(), GENERIC_WRITE | DELETE, FILE_SHARE_READ, nullptr,
+    const auto temporaryName = windowsPath(temporary);
+    HANDLE file = CreateFileW(temporaryName.c_str(), GENERIC_WRITE | DELETE, FILE_SHARE_READ, nullptr,
         CREATE_NEW, FILE_ATTRIBUTE_NORMAL, nullptr);
     if (file == INVALID_HANDLE_VALUE) return false;
     std::size_t offset = 0;
@@ -94,7 +113,7 @@ bool writeSave(const fs::path& path, const std::string& data) {
     }
     ok = ok && FlushFileBuffers(file);
     if (ok) {
-        const auto name = destination.native();
+        const auto name = windowsPath(destination);
         const auto length = name.size() * sizeof(wchar_t);
         std::vector<unsigned char> storage(sizeof(FILE_RENAME_INFO) + length);
         auto* rename = reinterpret_cast<FILE_RENAME_INFO*>(storage.data());

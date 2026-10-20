@@ -41,6 +41,12 @@ int main() {
     assert(vb::desktop::writeSave(unicode, "unicode path"));
     assert(vb::desktop::readSave(unicode, loaded) == vb::desktop::ReadSaveResult::valid);
     assert(loaded == "unicode path");
+    auto longPath = root;
+    while (fs::absolute(longPath).native().size() < 310) longPath /= std::string(45, 'l');
+    longPath /= "long-path.save";
+    assert(vb::desktop::writeSave(longPath, "long path progress"));
+    assert(vb::desktop::readSave(longPath, loaded) == vb::desktop::ReadSaveResult::valid);
+    assert(loaded == "long path progress");
     const auto external = root / "external.save";
     { std::ofstream output(external); output << "external progress"; }
     const auto linked = root / "linked.save";
