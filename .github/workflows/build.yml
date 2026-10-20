@@ -10,6 +10,20 @@ concurrency:
   group: vibe-beasts-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
 jobs:
+  native-linux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Check native rules and bounded save files
+        run: |
+          mkdir -p build
+          clang++ -std=c++17 -O2 -Wall -Wextra -Werror src/game.cpp tests/core-tests.cpp -o build/core-tests
+          ./build/core-tests
+          c++ -std=c++17 -O2 -Wall -Wextra -Werror -pthread src/save-file.cpp tests/save-file-tests.cpp -o build/save-file-tests
+          ./build/save-file-tests
   windows:
     runs-on: windows-latest
     timeout-minutes: 25
@@ -72,7 +86,7 @@ jobs:
           path: build/tool-dependencies/
           if-no-files-found: ignore
   publish:
-    needs: windows
+    needs: [windows, native-linux]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 10

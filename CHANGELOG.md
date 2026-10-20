@@ -1,5 +1,11 @@
 # Changes
 
+## 1.2.1
+
+- Bound native save and import reads to 16,000 bytes using one regular-file handle; reject links, directories and oversized inputs while preserving existing progress.
+- Create staged saves exclusively and keep their native handles through the write. Windows renames and failure cleanup operate on that handle; POSIX publishes from a private staging directory using directory handles. Failed writes preserve the previous save.
+- Exercise concurrent writers, Unicode paths, file links, size boundaries and failure preservation in native tests on Windows and Linux.
+
 ## 1.2.0
 
 - Keep unreadable Windows saves unchanged until a player imports a valid backup or explicitly chooses a new egg. Failed saves retain the previous good file.
